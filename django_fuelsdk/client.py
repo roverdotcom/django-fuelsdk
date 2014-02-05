@@ -38,8 +38,8 @@ class ConfigurableET_Client(ET_Client):
             self.authTokenExpiration = time.time() + jwt_user['expiresIn']
             self.internalAuthToken = jwt_user['internalAuthToken']
 
-            if 'refreshToken' in decodedJWT:
-                self.refreshKey = tokenResponse['request']['user']['refreshToken']
+            if 'refreshToken' in jwt_user:
+                self.refreshKey = jwt_user['refreshToken']
             self.build_soap_client()
             pass
         else:
