@@ -4,13 +4,26 @@ import time
 from FuelSDK import ET_Client
 import jwt
 
+PRODUCTION_WSDL_URL = 'https://webservice.exacttarget.com/etframework.wsdl'
+PRODUCTION_AUTH_URL = 'https://auth.exacttargetapis.com/v1/requestToken?legacy=1'
+
 
 class ConfigurableET_Client(ET_Client):
     """
     The base ET_Client class requires the configuration to be loaded from a
     file, this subclass allows the configuration to be specified at runtime.
     """
-    def __init__(self, get_server_wsdl=False, debug=False, params=None):
+    def __init__(
+            self,
+            client_id,
+            client_secret,
+            appsignature,
+            wsdl_server_url=PRODUCTION_WSDL_URL,
+            auth_url=PRODUCTION_AUTH_URL,
+            get_server_wsdl=False,
+            debug=False,
+            params=None):
+
         self.debug = debug
         if debug:
             logging.basicConfig(level=logging.INFO)
@@ -19,14 +32,11 @@ class ConfigurableET_Client(ET_Client):
             logging.getLogger('suds.xsd.schema').setLevel(logging.DEBUG)
             logging.getLogger('suds.wsdl').setLevel(logging.DEBUG)
 
-        ## Read the config information out of config.python
-        config = ConfigParser.RawConfigParser()
-        config.read('config.python')
-        self.client_id = config.get('Web Services', 'clientid')
-        self.client_secret = config.get('Web Services', 'clientsecret')
-        self.appsignature = config.get('Web Services', 'appsignature')
-        wsdl_server_url = config.get('Web Services', 'defaultwsdl')
-        self.auth_url = config.get('Web Services', 'authenticationurl')
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.appsignature = appsignature
+        wsdl_server_url = wsdl_server_url
+        self.auth_url = auth_url
 
         self.wsdl_file_url = self.load_wsdl(wsdl_server_url, get_server_wsdl)
 
