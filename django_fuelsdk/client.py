@@ -12,7 +12,7 @@ class ConfigurableET_Client(ET_Client):
     """
     def __init__(self, get_server_wsdl=False, debug=False, params=None):
         self.debug = debug
-        if(debug):
+        if debug:
             logging.basicConfig(level=logging.INFO)
             logging.getLogger('suds.client').setLevel(logging.DEBUG)
             logging.getLogger('suds.transport').setLevel(logging.DEBUG)
@@ -29,13 +29,15 @@ class ConfigurableET_Client(ET_Client):
         self.auth_url = config.get('Web Services', 'authenticationurl')
 
         self.wsdl_file_url = self.load_wsdl(wsdl_server_url, get_server_wsdl)
-        
-        ## get the JWT from the params if passed in...or go to the server to get it             
-        if(params is not None and 'jwt' in params):
+
+        ## get the JWT from the params if passed in...or go to the server to get it
+        if params is not None and 'jwt' in params:
             decodedJWT = jwt.decode(params['jwt'], self.appsignature)
-            self.authToken = decodedJWT['request']['user']['oauthToken']
-            self.authTokenExpiration = time.time() + decodedJWT['request']['user']['expiresIn']
-            self.internalAuthToken = decodedJWT['request']['user']['internalOauthToken']
+            jwt_user = decodedJWT['request']['user']
+            self.authToken = jwt_user['oauthToken']
+            self.authTokenExpiration = time.time() + jwt_user['expiresIn']
+            self.internalAuthToken = jwt_user['internalAuthToken']
+
             if 'refreshToken' in decodedJWT:
                 self.refreshKey = tokenResponse['request']['user']['refreshToken']
             self.build_soap_client()
