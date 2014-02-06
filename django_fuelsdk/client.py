@@ -4,6 +4,8 @@ import time
 from FuelSDK import ET_Client
 import jwt
 
+
+# https://code.exacttarget.com/question/there-any-cetificrate-install-our-server-access-et-api
 PRODUCTION_WSDL_URL = 'https://webservice.exacttarget.com/etframework.wsdl'
 PRODUCTION_AUTH_URL = 'https://auth.exacttargetapis.com/v1/requestToken?legacy=1'
 
@@ -17,7 +19,7 @@ class ConfigurableET_Client(ET_Client):
             self,
             client_id,
             client_secret,
-            appsignature,
+            appsignature=None,
             wsdl_server_url=PRODUCTION_WSDL_URL,
             auth_url=PRODUCTION_AUTH_URL,
             get_server_wsdl=False,
