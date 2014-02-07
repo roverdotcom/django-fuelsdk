@@ -1,0 +1,2 @@
+-e git+https://github.com/roverdotcom/suds.git#egg=suds
+-e git+https://github.com/roverdotcom/django-fuelsdk.git#egg=django_fuelsdk
