@@ -2,24 +2,22 @@ from django.core import mail
 
 from FuelSDK import ET_TriggeredSend
 
-from client import ConfigurableET_Client
+from django_fuelsdk.client import ConfigurableET_Client
+from django_fuelsdk.constants import CLIENT_ID
+from django_fuelsdk.constants import CLIENT_SECRET
+from django_fuelsdk.constants import WSDL_URL
 
 
 class FuelApiError(StandardError):
     pass
 
 
-class FuelClientBase(object):
+class FuelClient(object):
     def __init__(self):
-        raise NotImplemented()
-
-    def send(self, email, to, data):
-        raise NotImplemented()
-
-
-class FuelClient(FuelClientBase):
-    def __init__(self, *args, **kwargs):
-        self.client = ConfigurableET_Client(*args, **kwargs)
+        self.client = ConfigurableET_Client(
+            CLIENT_ID,
+            CLIENT_SECRET,
+            wsdl_server_url=WSDL_URL)
 
     def build_attributes(self, data):
         return [{'Name': key, 'Value': value} for key, value in data.items()]
@@ -42,18 +40,12 @@ class FuelClient(FuelClientBase):
         return self.process_result(ts.send())
 
 
-class DebugFuelClient(FuelClientBase):
-    def __init__(self, *args, **kwargs):
-        pass
-
+class DebugFuelClient(object):
     def send(self, email, to, data):
         print 'Email %s sent to %s with the data %s' % (email, to, data)
 
 
-class TestFuelClient(FuelClientBase):
-    def __init__(self, *args, **kwargs):
-        pass
-
+class TestFuelClient(object):
     def send(self, email, to, data):
         mail.outbox.append({
             'email': email,
