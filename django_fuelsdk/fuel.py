@@ -32,8 +32,7 @@ class FuelClient(object):
 
         return response
 
-    def send(self, email_name, to, data=None):
-        data = data or {}
+    def send(self, email_name, to, data):
         ts = ET_TriggeredSend()
         ts.auth_stub = self.client
         ts.props = {'CustomerKey': email_name}
@@ -44,8 +43,7 @@ class FuelClient(object):
         }]
         return self.process_result(ts.send())
 
-    def add_subscriber(self, email_address, data=None):
-        data = data or {}
+    def add_subscriber(self, email_address, data):
         sub = ET_Subscriber()
         sub.auth_stub = self.client
         sub.props = {

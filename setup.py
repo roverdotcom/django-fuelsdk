@@ -1,20 +1,43 @@
-from setuptools import setup, find_packages
+from setuptools import setup
+from setuptools import Command
+
+
+class TestCommand(Command):
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        from django.conf import settings
+
+        settings.configure(
+            DATABASES={
+                'default': {
+                    'NAME': ':memory:',
+                    'ENGINE': 'django.db.backends.sqlite3',
+                },
+            },
+            INSTALLED_APPS=['django_fuelsdk']
+        )
+
+        from django.core.management import call_command
+        call_command('test', 'django_fuelsdk')
+
 
 setup(
     name='django-fuelsdk',
-    version="0.1",
+    version='0.2',
     description='Django wrapper for the ExactTarget FuelSDK.',
     long_description=open('README.md').read(),
     author='Johannas Heller',
     author_email='johann@rover.com',
-    maintainer='Johannas Heller',
-    maintainer_email='johann@rover.com',
     license='MIT',
     url='https://github.com/roverdotcom/django-fuelsdk',
-    download_url='https://github.com/roverdotcom/django-fuelsdk/releases',
-    packages=find_packages(),
-    include_package_data=True,
-    zip_safe=False,
+    packages=['django_fuelsdk'],
     keywords=['fuelsdk', 'email', 'django'],
     classifiers=[
         'Environment :: Other Environment',
@@ -27,5 +50,6 @@ setup(
     ],
     install_requires=[
         'FuelSDK',
-    ]
+    ],
+    cmdclass={'test': TestCommand}
 )
