@@ -9,6 +9,9 @@ from django_fuelsdk.constants import CLIENT_SECRET
 from django_fuelsdk.constants import WSDL_URL
 
 
+ALREADY_SUBSCRIBED_ERROR_CODE = 12014
+
+
 class FuelApiError(StandardError):
     pass
 
@@ -29,10 +32,11 @@ class FuelClient(object):
 
         return response
 
-    def send(self, email, to, data):
+    def send(self, email_name, to, data=None):
+        data = data or {}
         ts = ET_TriggeredSend()
         ts.auth_stub = self.client
-        ts.props = {'CustomerKey': email}
+        ts.props = {'CustomerKey': email_name}
         ts.subscribers = [{
             'EmailAddress': to,
             'SubscriberKey': to,
@@ -40,7 +44,8 @@ class FuelClient(object):
         }]
         return self.process_result(ts.send())
 
-    def add_subscriber(self, email_address, data):
+    def add_subscriber(self, email_address, data=None):
+        data = data or {}
         sub = ET_Subscriber()
         sub.auth_stub = self.client
         sub.props = {
@@ -48,14 +53,24 @@ class FuelClient(object):
             'SubscriberKey': email_address,
             'Attributes': self.build_attributes(data)
         }
-        return self.process_result(sub.post())
+        response = sub.post()
+
+        try:
+            if (response.message == 'Error' and
+                response.results[0]['ErrorCode'] == ALREADY_SUBSCRIBED_ERROR_CODE):
+                return response
+        except (IndexError, KeyError):
+            # In case of error continue with normal error processing
+            pass
+
+        return self.process_result(response)
 
 
 class DebugFuelClient(object):
-    def send(self, email, to, data):
-        print 'Email %s sent to %s with the data %s' % (email, to, data)
+    def send(self, email_name, to, data=None):
+        print 'Email %s sent to %s with the data %s' % (email_name, to, data)
 
-    def add_subscriber(self, email_address, data):
+    def add_subscriber(self, email_address, data=None):
         print 'Subscriber %s added with the data %s' % (email_address, data)
 
 
