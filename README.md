@@ -3,6 +3,8 @@ django-fuelsdk
 
 ExactTarget FuelSDK wrapper for Django.
 
+.. image:: https://travis-ci.org/bradjasper/django-jsonfield.png?branch=master
+
 Install
 =======
 
