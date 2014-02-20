@@ -38,7 +38,7 @@ class FuelClient(object):
             'SubscriberKey': to,
             'Attributes': self.build_attributes(data),
         }]
-        return self.process_result(ts.post())
+        return self.process_result(ts.send())
 
     def add_subscriber(self, email_address, data):
         sub = ET_Subscriber()
@@ -48,7 +48,7 @@ class FuelClient(object):
             'SubscriberKey': email_address,
             'Attributes': self.build_attributes(data)
         }
-        return self.process_result(sub.send())
+        return self.process_result(sub.post())
 
 
 class DebugFuelClient(object):
