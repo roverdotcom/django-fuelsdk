@@ -1,6 +1,7 @@
 from django.core import mail
 
 from FuelSDK import ET_TriggeredSend
+from FuelSDK import ET_Subscriber
 
 from django_fuelsdk.client import ConfigurableET_Client
 from django_fuelsdk.constants import CLIENT_ID
@@ -37,12 +38,25 @@ class FuelClient(object):
             'SubscriberKey': to,
             'Attributes': self.build_attributes(data),
         }]
-        return self.process_result(ts.send())
+        return self.process_result(ts.post())
+
+    def add_subscriber(self, email_address, data):
+        sub = ET_Subscriber()
+        sub.auth_stub = self.client
+        sub.props = {
+            'EmailAddress': email_address,
+            'SubscriberKey': email_address,
+            'Attributes': self.build_attributes(data)
+        }
+        return self.process_result(sub.send())
 
 
 class DebugFuelClient(object):
     def send(self, email, to, data):
         print 'Email %s sent to %s with the data %s' % (email, to, data)
+
+    def add_subscriber(self, email_address, data):
+        print 'Subscriber %s added with the data %s' % (email_address, data)
 
 
 class TestFuelClient(object):
