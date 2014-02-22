@@ -38,5 +38,16 @@ from django_fuelsdk.fuel import FuelClient
 
 f = FuelClient()
 
-r = f.send('Welcome', 'test@example.com', {'variable': 'test'})
+# Send a triggered send to a specific subscriber (used for transactional email)
+f.send('Welcome', 'test@example.com', {'variable': 'test'})
+
+# Add a subscriber
+# Note: The underlying ExactTarget API throws an error when trying to
+# add a subscriber that already exists. This method will silence that error,
+# making add_subscriber idempotent. 
+f.add_subscriber('test@example.com', {'variable': 'test'})
+
+# Any error returned by the API will cause a django_fuelsdk.fuel.FuelApiError
+# exception to be raised. 
+f.send('Not an Email', 'test@example.com', {})
 ```
