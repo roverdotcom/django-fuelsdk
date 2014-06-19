@@ -4,10 +4,13 @@ from mock import patch
 from mock import MagicMock
 
 from django_fuelsdk.fuel import FuelClient
+
 from django_fuelsdk.fuel import FuelApiError
 from django_fuelsdk.fuel import AlreadySubscribedError
+from django_fuelsdk.fuel import NoValidSubscribersError
 
 from django_fuelsdk.fuel import ALREADY_SUBSCRIBED_ERROR_CODE
+from django_fuelsdk.fuel import NO_VALID_SUBSCRIBERS_ERROR_CODE
 
 
 class FuelClientTestCase(TestCase):
@@ -109,10 +112,16 @@ class FuelClientAddSubscriberTests(FuelClientEtMockTestCase):
                 'Attributes': [{'Name': 'First Name', 'Value': 'Bob'}],
             })
 
-    def test_raises_on_already_subsribed(self):
+    def test_raises_on_already_subscribed(self):
         self.response.message = 'Error'
         self.response.results = [{'ErrorCode': ALREADY_SUBSCRIBED_ERROR_CODE}]
         with self.assertRaises(AlreadySubscribedError):
+            self.add_subscriber()
+
+    def test_raises_on_no_valid_subscribers(self):
+        self.response.message = 'Error'
+        self.response.results = [{'ErrorCode': NO_VALID_SUBSCRIBERS_ERROR_CODE}]
+        with self.assertRaises(NoValidSubscribersError):
             self.add_subscriber()
 
     def test_error_still_raised_on_strange_response(self):

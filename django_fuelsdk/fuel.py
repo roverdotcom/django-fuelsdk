@@ -10,6 +10,7 @@ from django_fuelsdk.constants import WSDL_URL
 
 
 ALREADY_SUBSCRIBED_ERROR_CODE = 12014
+NO_VALID_SUBSCRIBERS_ERROR_CODE = 180008
 
 
 class FuelApiError(StandardError):
@@ -17,6 +18,10 @@ class FuelApiError(StandardError):
 
 
 class AlreadySubscribedError(FuelApiError):
+    pass
+
+
+class NoValidSubscribersError(FuelApiError):
     pass
 
 
@@ -58,9 +63,13 @@ class FuelClient(object):
         response = sub.post()
 
         try:
-            if (response.message == 'Error' and
-                response.results[0]['ErrorCode'] == ALREADY_SUBSCRIBED_ERROR_CODE):
-                raise AlreadySubscribedError()
+            if response.message == 'Error':
+                error_code = response.results[0]['ErrorCode']
+                if error_code == ALREADY_SUBSCRIBED_ERROR_CODE:
+                    raise AlreadySubscribedError()
+                elif error_code == NO_VALID_SUBSCRIBERS_ERROR_CODE:
+                    raise NoValidSubscribersError()
+
         except (IndexError, KeyError):
             # In case of error continue with normal error processing
             pass
