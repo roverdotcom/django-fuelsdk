@@ -5,6 +5,8 @@ from mock import MagicMock
 
 from django_fuelsdk.fuel import FuelClient
 from django_fuelsdk.fuel import FuelApiError
+from django_fuelsdk.fuel import AlreadySubscribedError
+
 from django_fuelsdk.fuel import ALREADY_SUBSCRIBED_ERROR_CODE
 
 
@@ -15,11 +17,8 @@ class FuelClientTestCase(TestCase):
         self._et_client_patcher = patch(
             'django_fuelsdk.fuel.ConfigurableET_Client')
         self._et_client_patcher.start()
+        self.addCleanup(self._et_client_patcher.stop)
         self.client = FuelClient()
-
-    def tearDown(self):
-        self._et_client_patcher.stop()
-        super(FuelClientTestCase, self).setUp()
 
 
 class FuelClientTests(FuelClientTestCase):
@@ -50,16 +49,13 @@ class FuelClientEtMockTestCase(FuelClientTestCase):
         super(FuelClientEtMockTestCase, self).setUp()
         self._et_patcher = patch(self.et_patch_location)
         class_mock = self._et_patcher.start()
+        self.addCleanup(self._et_patcher.stop)
 
         self.instance = MagicMock()
         class_mock.return_value = self.instance
 
         self.response = MagicMock()
         self.response.message = 'OK'
-
-    def tearDown(self):
-        self._et_patcher.stop()
-        super(FuelClientEtMockTestCase, self).tearDown()
 
 
 class FuelClientSendTests(FuelClientEtMockTestCase):
@@ -113,11 +109,11 @@ class FuelClientAddSubscriberTests(FuelClientEtMockTestCase):
                 'Attributes': [{'Name': 'First Name', 'Value': 'Bob'}],
             })
 
-    def test_does_not_error_on_already_subsribed(self):
-        self.response.message == 'Error'
+    def test_raises_on_already_subsribed(self):
+        self.response.message = 'Error'
         self.response.results = [{'ErrorCode': ALREADY_SUBSCRIBED_ERROR_CODE}]
-        self.add_subscriber()
-        self.assertTrue(self.instance.post.called)
+        with self.assertRaises(AlreadySubscribedError):
+            self.add_subscriber()
 
     def test_error_still_raised_on_strange_response(self):
         self.response.message = 'Error'

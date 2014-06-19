@@ -16,6 +16,10 @@ class FuelApiError(StandardError):
     pass
 
 
+class AlreadySubscribedError(FuelApiError):
+    pass
+
+
 class FuelClient(object):
     def __init__(self):
         self.client = ConfigurableET_Client(
@@ -56,7 +60,7 @@ class FuelClient(object):
         try:
             if (response.message == 'Error' and
                 response.results[0]['ErrorCode'] == ALREADY_SUBSCRIBED_ERROR_CODE):
-                return response
+                raise AlreadySubscribedError()
         except (IndexError, KeyError):
             # In case of error continue with normal error processing
             pass
