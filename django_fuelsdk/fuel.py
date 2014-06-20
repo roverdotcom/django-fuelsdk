@@ -14,7 +14,14 @@ NO_VALID_SUBSCRIBERS_ERROR_CODE = 180008
 
 
 class FuelApiError(StandardError):
-    pass
+    def __init__(self, results):
+        self.results = results
+
+    def __unicode__(self):
+        return repr(self.results)
+
+    def __str__(self):
+        return unicode(self)
 
 
 class AlreadySubscribedError(FuelApiError):
@@ -37,7 +44,7 @@ class FuelClient(object):
 
     def process_result(self, response):
         if response.message != 'OK':
-            raise FuelApiError('API error: %s' % response.results)
+            raise FuelApiError(response.results)
 
         return response
 
@@ -66,9 +73,9 @@ class FuelClient(object):
             if response.message == 'Error':
                 error_code = response.results[0]['ErrorCode']
                 if error_code == ALREADY_SUBSCRIBED_ERROR_CODE:
-                    raise AlreadySubscribedError()
+                    raise AlreadySubscribedError(response.results)
                 elif error_code == NO_VALID_SUBSCRIBERS_ERROR_CODE:
-                    raise NoValidSubscribersError()
+                    raise NoValidSubscribersError(response.results)
 
         except (IndexError, KeyError):
             # In case of error continue with normal error processing
