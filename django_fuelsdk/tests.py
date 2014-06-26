@@ -67,18 +67,23 @@ class FuelClientSendTests(FuelClientEtMockTestCase):
     def setUp(self):
         super(FuelClientSendTests, self).setUp()
         self.instance.send.return_value = self.response
+
+    def send(self):
         self.client.send(
             'Test Email', 'test@example.com', {'First Name': 'Bob'})
 
     def test_calls_send(self):
+        self.send()
         self.assertTrue(self.instance.send.called)
 
     def test_sets_props(self):
+        self.send()
         self.assertEqual(
             self.instance.props,
             {'CustomerKey': 'Test Email'})
 
     def test_sets_subcribers(self):
+        self.send()
         self.assertEqual(
             self.instance.subscribers,
             [{
@@ -86,6 +91,20 @@ class FuelClientSendTests(FuelClientEtMockTestCase):
                 'SubscriberKey': 'test@example.com',
                 'Attributes': [{'Name': 'First Name', 'Value': 'Bob'}],
             }])
+
+    def test_raises_on_no_valid_subscribers(self):
+        self.response.message = 'Error'
+        self.response.results = [
+            {'ErrorCode': NO_VALID_SUBSCRIBERS_ERROR_CODE}
+        ]
+        with self.assertRaises(NoValidSubscribersError):
+            self.send()
+
+    def test_error_still_raised_on_strange_response(self):
+        self.response.message = 'Error'
+        self.response.results = []
+        with self.assertRaises(FuelApiError):
+            self.send()
 
 
 class FuelClientAddSubscriberTests(FuelClientEtMockTestCase):
@@ -116,12 +135,6 @@ class FuelClientAddSubscriberTests(FuelClientEtMockTestCase):
         self.response.message = 'Error'
         self.response.results = [{'ErrorCode': ALREADY_SUBSCRIBED_ERROR_CODE}]
         with self.assertRaises(AlreadySubscribedError):
-            self.add_subscriber()
-
-    def test_raises_on_no_valid_subscribers(self):
-        self.response.message = 'Error'
-        self.response.results = [{'ErrorCode': NO_VALID_SUBSCRIBERS_ERROR_CODE}]
-        with self.assertRaises(NoValidSubscribersError):
             self.add_subscriber()
 
     def test_error_still_raised_on_strange_response(self):

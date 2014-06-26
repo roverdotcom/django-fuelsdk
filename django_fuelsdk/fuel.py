@@ -43,6 +43,18 @@ class FuelClient(object):
         return [{'Name': key, 'Value': value} for key, value in data.items()]
 
     def process_result(self, response):
+        try:
+            if response.message == 'Error':
+                error_code = response.results[0]['ErrorCode']
+                if error_code == ALREADY_SUBSCRIBED_ERROR_CODE:
+                    raise AlreadySubscribedError(response.results)
+                elif error_code == NO_VALID_SUBSCRIBERS_ERROR_CODE:
+                    raise NoValidSubscribersError(response.results)
+
+        except (IndexError, KeyError):
+            # In case of error continue with normal error processing
+            pass
+
         if response.message != 'OK':
             raise FuelApiError(response.results)
 
@@ -68,19 +80,6 @@ class FuelClient(object):
             'Attributes': self.build_attributes(data)
         }
         response = sub.post()
-
-        try:
-            if response.message == 'Error':
-                error_code = response.results[0]['ErrorCode']
-                if error_code == ALREADY_SUBSCRIBED_ERROR_CODE:
-                    raise AlreadySubscribedError(response.results)
-                elif error_code == NO_VALID_SUBSCRIBERS_ERROR_CODE:
-                    raise NoValidSubscribersError(response.results)
-
-        except (IndexError, KeyError):
-            # In case of error continue with normal error processing
-            pass
-
         return self.process_result(response)
 
 
