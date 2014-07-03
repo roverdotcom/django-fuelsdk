@@ -91,10 +91,13 @@ class DebugFuelClient(object):
         print 'Subscriber %s added with the data %s' % (email_address, data)
 
 
+class ExactTargetEmail(object):
+    def __init__(self, email, to, context_data):
+        self.email = email
+        self.to = to
+        self.context_data = context_data
+
+
 class TestFuelClient(object):
     def send(self, email, to, data):
-        mail.outbox.append({
-            'email': email,
-            'to': to,
-            'data': data,
-        })
+        mail.outbox.append(ExactTargetEmail(email, to, data))
