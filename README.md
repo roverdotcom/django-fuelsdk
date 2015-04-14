@@ -3,7 +3,7 @@ django-fuelsdk
 
 ExactTarget FuelSDK wrapper for Django.
 
-![Travis CI Build Status](https://travis-ci.org/roverdotcom/django-fuelsdk?branch=master)
+![Travis CI Build Status](https://travis-ci.org/roverdotcom/django-fuelsdk.svg?branch=master)
 
 Install
 =======
